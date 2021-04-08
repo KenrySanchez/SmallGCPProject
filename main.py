@@ -31,7 +31,6 @@ from datetime import datetime
 from google.api_core import retry
 from google.cloud import bigquery
 from google.cloud import firestore
-from google.cloud import pubsub_v1
 from google.cloud import storage
 import pytz
 
