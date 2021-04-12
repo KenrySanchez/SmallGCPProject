@@ -47,7 +47,7 @@ class DataflowOptions(PipelineOptions):
                 | 'Write to BigQuery' >> beam.io.Write(beam.io.BigQuerySink(pipeline_options['output']))
             )
 
-
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    run()
+    r = DataflowOptions()
+    r.run()
