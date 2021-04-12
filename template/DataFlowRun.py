@@ -33,6 +33,10 @@ class ReadFile(beam.DoFn):
 
 class DataflowOptions(PipelineOptions):
 
+    @classmethod
+    def _add_argparse_args(cls, parser):
+        parser.add_argument('--input_path', type=str)
+
     def run(self, argv=None):
         parser = argparse.ArgumentParser()
         known_args, pipeline_args = parser.parse_known_args(argv)
