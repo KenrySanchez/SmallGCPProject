@@ -30,12 +30,14 @@ from datetime import datetime
 
 from google.api_core import retry
 from google.cloud import bigquery
+from google.cloud import firestore
 from google.cloud import storage
 import pytz
 
 PROJECT_ID = os.getenv('apt-subset-310017')
 BQ_DATASET = 'bq_object_detection_store'
 BQ_TABLE = 'data_store'
+DB = firestore.Client()
 CS = storage.Client()
 BQ = bigquery.Client()
 
@@ -44,10 +46,31 @@ def streaming(data, context):
     '''This function is executed whenever a file is added to Cloud Storage'''
     bucket_name = data['bucket']
     file_name = data['name']
-    try:
-        _insert_into_bigquery(bucket_name, file_name)
-    except Exception as e:
-        logging.error(e)
+    db_ref = DB.document(u'streaming_files/%s' % file_name)
+    if _was_already_ingested(db_ref):
+        _handle_duplication(db_ref)
+    else:
+        try:
+            _insert_into_bigquery(bucket_name, file_name)
+            _handle_success(db_ref)
+        except Exception:
+            _handle_error(db_ref)
+
+
+def _was_already_ingested(db_ref):
+    status = db_ref.get()
+    return status.exists and status.to_dict()['success']
+
+
+def _handle_duplication(db_ref):
+    dups = [_now()]
+    data = db_ref.get().to_dict()
+    if 'duplication_attempts' in data:
+        dups.extend(data['duplication_attempts'])
+    db_ref.update({
+        'duplication_attempts': dups
+    })
+    logging.warn('Duplication attempt streaming file \'%s\'' % db_ref.id)
 
 
 def _insert_into_bigquery(bucket_name, file_name):
@@ -60,6 +83,27 @@ def _insert_into_bigquery(bucket_name, file_name):
                                  retry=retry.Retry(deadline=30))
     if errors != []:
         raise BigQueryError(errors)
+
+
+def _handle_success(db_ref):
+    message = 'File \'%s\' streamed into BigQuery' % db_ref.id
+    doc = {
+        u'success': True,
+        u'when': _now()
+    }
+    db_ref.set(doc)
+    logging.info(message)
+
+
+def _handle_error(db_ref):
+    message = 'Error streaming file \'%s\'. Cause: %s' % (db_ref.id, traceback.format_exc())
+    doc = {
+        u'success': False,
+        u'error_message': message,
+        u'when': _now()
+    }
+    db_ref.set(doc)
+    logging.error(message)
 
 
 def _now():

@@ -1,0 +1,2 @@
+google-cloud-storage==1.28.1
+smart-open==2.0.0
