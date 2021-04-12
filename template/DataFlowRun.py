@@ -46,7 +46,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | 'Start' >> beam.Create([None])
                 | 'Read JSON' >> beam.ParDo(ReadFile(user_options.input))
-                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('myBucket:tableFolder.test_table', schema="line:STRING"))
+                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('apt-subset-310017:bq_object_detection_store.data_store', schema="line:STRING"))
             )
 
 if __name__ == '__main__':
