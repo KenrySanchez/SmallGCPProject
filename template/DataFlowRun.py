@@ -33,19 +33,19 @@ class ReadFile(beam.DoFn):
 
 class DataflowOptions(PipelineOptions):
 
-def run(argv=None):
-    parser = argparse.ArgumentParser()
-    known_args, pipeline_args = parser.parse_known_args(argv)
+    def run(self, argv=None):
+        parser = argparse.ArgumentParser()
+        known_args, pipeline_args = parser.parse_known_args(argv)
 
-    pipeline_options = PipelineOptions(pipeline_args)
-    dataflow_options = pipeline_options.view_as(DataflowOptions)
+        pipeline_options = PipelineOptions(pipeline_args)
+        dataflow_options = pipeline_options.view_as(DataflowOptions)
 
-    with beam.Pipeline(options=pipeline_options) as pipeline:
-        (pipeline
-         | 'Start' >> beam.Create([None])
-         | 'Read JSON' >> beam.ParDo(ReadFile(dataflow_options.input_path))
-         | 'Write to BigQuery' >> beam.io.Write(beam.io.BigQuerySink(pipeline_options['output']))
-         )
+        with beam.Pipeline(options=pipeline_options) as pipeline:
+            (pipeline
+                | 'Start' >> beam.Create([None])
+                | 'Read JSON' >> beam.ParDo(ReadFile(dataflow_options.input_path))
+                | 'Write to BigQuery' >> beam.io.Write(beam.io.BigQuerySink(pipeline_options['output']))
+            )
 
 
 if __name__ == '__main__':
