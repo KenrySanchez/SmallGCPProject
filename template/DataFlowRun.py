@@ -48,7 +48,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | 'Start' >> beam.Create([None])
                 | 'Read JSON' >> beam.ParDo(ReadFile(dataflow_options.input_path))
-                | 'Write to BigQuery' >> beam.io.Write(beam.io.BigQuerySink(pipeline_options['output']))
+                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('myBucket:tableFolder.test_table', schema="line:STRING"))
             )
 
 if __name__ == '__main__':
