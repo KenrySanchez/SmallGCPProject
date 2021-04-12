@@ -16,9 +16,9 @@ class ReadFile(beam.DoFn):
     def start_bundle(self):
         self.client = storage.Client()
 
-    def process(self):
+    def process(self, something):
         logging.info("kenry")
-        loggin.info(self.input_path)
+        logging.info(something)
         clear_data = []
         with open(self.input_path) as fin:
             for line in fin:
