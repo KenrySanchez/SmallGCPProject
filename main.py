@@ -61,7 +61,7 @@ def _insert_into_bigquery(bucket_name, file_name, time_exec):
     inputFile = "gs://" + bucket_name + "/" + file_name
 
     parameters = {
-        'inputFile': inputFile
+        'input_path': inputFile
     }
 
     environment = {'tempLocation': 'gs://dataflow_assets/temp'}
