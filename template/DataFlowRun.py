@@ -18,7 +18,7 @@ class ReadFile(beam.DoFn):
 
     def process(self, something):
         logging.info("kenry")
-        logging.info(something)
+        logging.info(self.input_path)
         clear_data = []
         with open(self.input_path) as fin:
             for line in fin:
@@ -43,8 +43,6 @@ class DataflowOptions(PipelineOptions):
     def run(self, argv=None):
         pipeline_options = PipelineOptions()
         user_options = pipeline_options.view_as(DataflowOptions)
-
-        logging.info(user_options.input)
 
         with beam.Pipeline(options=pipeline_options) as pipeline:
             (pipeline
