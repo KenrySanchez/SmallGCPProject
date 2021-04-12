@@ -11,6 +11,8 @@ from smart_open import open
 class ReadFile(beam.DoFn):
 
     def __init__(self, input_path):
+        print("kenry")
+        print(input_path)
         self.input_path = input_path
 
     def start_bundle(self):
@@ -41,6 +43,8 @@ class DataflowOptions(PipelineOptions):
     def run(self, argv=None):
         pipeline_options = PipelineOptions()
         user_options = pipeline_options.view_as(DataflowOptions)
+
+        print(user_options.input)
 
         with beam.Pipeline(options=pipeline_options) as pipeline:
             (pipeline
