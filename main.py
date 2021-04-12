@@ -31,6 +31,7 @@ from datetime import datetime
 from google.api_core import retry
 from google.cloud import bigquery
 from google.cloud import storage
+from googleapiclient.discovery import build
 import pytz
 
 PROJECT_ID = os.getenv('apt-subset-310017')
@@ -45,36 +46,37 @@ def streaming(data, context):
     bucket_name = data['bucket']
     file_name = data['name']
     try:
-        _insert_into_bigquery(bucket_name, file_name)
+        _insert_into_bigquery(bucket_name, file_name, str(data['timeCreated']))
     except Exception as e:
         logging.error(e)
 
 
-def _insert_into_bigquery(bucket_name, file_name):
-    blob = CS.get_bucket(bucket_name).blob(file_name)
-    row = json.loads(blob.download_as_string())
-    table = BQ.dataset(BQ_DATASET).table(BQ_TABLE)
-    errors = BQ.insert_rows_json(table,
-                                 json_rows=[row],
-                                 row_ids=[file_name],
-                                 retry=retry.Retry(deadline=30))
-    if errors != []:
-        raise BigQueryError(errors)
+def _insert_into_bigquery(bucket_name, file_name, time_exec):
 
+    project = "apt-subset-310017"
+    job = project + " " + time_exec
 
-def _now():
-    return datetime.utcnow().replace(tzinfo=pytz.utc).strftime('%Y-%m-%d %H:%M:%S %Z')
+    #path of the dataflow template on google storage bucket
+    template = "gs://dataflow_assets/templates/myTemplate"
+    inputFile = "gs://" + bucket_name + "/" + file_name
 
+    parameters = {
+        'input_path': inputFile
+    }
 
-class BigQueryError(Exception):
-    '''Exception raised whenever a BigQuery error happened''' 
+    environment = {'tempLocation': 'gs://dataflow_assets/temp'}
+    service = build('dataflow', 'v1b3', cache_discovery=False)
 
-    def __init__(self, errors):
-        super().__init__(self._format(errors))
-        self.errors = errors
+    request = service.projects().locations().templates().launch(
+        projectId=project,
+        gcsPath=template,
+        location='us-central1',
+        body={
+            'jobName': job,
+         			'parameters': parameters,
+         			'environment': environment
+        },
+    )
 
-    def _format(self, errors):
-        err = []
-        for error in errors:
-            err.extend(error['errors'])
-        return json.dumps(err)
+    response = request.execute()
+    print(str(response))
