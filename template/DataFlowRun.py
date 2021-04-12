@@ -35,7 +35,7 @@ class DataflowOptions(PipelineOptions):
 
     @classmethod
     def _add_argparse_args(cls, parser):
-        parser.add_argument('--input_path')
+        parser.add_argument('--input_file')
 
     def run(self, argv=None):
         parser = argparse.ArgumentParser()
@@ -47,7 +47,7 @@ class DataflowOptions(PipelineOptions):
         with beam.Pipeline(options=pipeline_options) as pipeline:
             (pipeline
                 | 'Start' >> beam.Create([None])
-                | 'Read JSON' >> beam.ParDo(ReadFile(dataflow_options.input_path))
+                | 'Read JSON' >> beam.ParDo(ReadFile(dataflow_options.input_file))
                 | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('myBucket:tableFolder.test_table', schema="line:STRING"))
             )
 
