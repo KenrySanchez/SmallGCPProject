@@ -39,7 +39,6 @@ class DataflowOptions(PipelineOptions):
 
     def run(self, argv=None):
         parser = argparse.ArgumentParser()
-        parser.add_argument('--input_path')
         known_args, pipeline_args = parser.parse_known_args(argv)
 
         pipeline_options = PipelineOptions(pipeline_args)
