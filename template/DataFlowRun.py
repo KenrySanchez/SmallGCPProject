@@ -18,19 +18,14 @@ class ReadFile(beam.DoFn):
 
     def process(self, something):
         
-        logging.info(self.input_path.get())
-
         clear_data = []
         with open(self.input_path.get()) as line:
 
-            logging.info("test")
             jsonAsString = line.read()
-            
+
             data = json.loads(jsonAsString)
-            logging.info(jsonAsString)
             
             for elems in data['annotation_results']:
-                logging.info(elems)
                 for item in elems['object_annotations']:
 
                     clear_data.append({
@@ -38,6 +33,7 @@ class ReadFile(beam.DoFn):
                         'time' : 0
                     })
 
+        logging.info(clear_data)
         yield clear_data
 
 class DataflowOptions(PipelineOptions):
@@ -54,7 +50,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | 'Start' >> beam.Create([None])
                 | 'Read JSON' >> beam.ParDo(ReadFile(user_options.input))
-                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('apt-subset-310017:bq_object_detection_store.data_store', schema="line:STRING"))
+                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('apt-subset-310017:bq_object_detection_store.data_store', schema="description:STRING,time:FLOAT"))
             )
 
 if __name__ == '__main__':
