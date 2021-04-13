@@ -35,7 +35,7 @@ class ReadFile(beam.DoFn):
 
         logging.info(clear_data)
 
-        json_string = json.dumps([item in clear_data])
+        json_string = json.dumps([item for item in clear_data])
         logging.info(json_string)
         yield json_string
 
