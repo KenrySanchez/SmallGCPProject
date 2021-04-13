@@ -30,10 +30,10 @@ class ReadFile(beam.DoFn):
             for elems in data['annotation_results']:
                 for item in elems['object_annotations']:
 
-                clear_data.append({
-                    'description': item['entity']['description'],
-                    'time' : 0
-                })
+                    clear_data.append({
+                        'description': item['entity']['description'],
+                        'time' : 0
+                    })
 
         yield clear_data
 
