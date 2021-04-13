@@ -50,7 +50,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | 'Start' >> beam.Create([None])
                 | 'Read JSON' >> beam.ParDo(ReadFile(user_options.input))
-                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('apt-subset-310017:bq_object_detection_store.data_store', schema="description:STRING,time:FLOAT"))
+                | 'Write to BigQuery' >> beam.io.Write(beam.io.WriteToBigQuery('apt-subset-310017:bq_object_detection_store.data_store', schema="description:STRING,time:FLOAT", write_disposition="beam.io.BigQueryDisposition.WRITE_APPEND"))
             )
 
 if __name__ == '__main__':
