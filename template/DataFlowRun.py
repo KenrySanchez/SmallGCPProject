@@ -39,7 +39,7 @@ class ReadFile(beam.DoFn):
                         'seconds'] if "seconds" in item['segment']['end_time_offset'] else 0
 
                     end_time_nanos = item['segment']['end_time_offset'][
-                        'nanos'] if "seconds" in item['segment']['end_time_offset'] else 0
+                        'nanos'] if "nanos" in item['segment']['end_time_offset'] else 0
 
                     yield {
                         'description': item['entity']['description'],
