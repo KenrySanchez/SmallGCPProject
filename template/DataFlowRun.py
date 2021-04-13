@@ -28,16 +28,16 @@ class ReadFile(beam.DoFn):
             for elems in data['annotation_results']:
                 for item in elems['object_annotations']:
 
+                    start_time_seconds = item.segment.start_time_offset.seconds if item.segment.start_time_offset.seconds != None else 0
+                    start_time_nanos = item.segment.start_time_offset.nanos if item.segment.start_time_offset.nanos != None else 0
+
+                    end_time_seconds = item.segment.end_time_offset.seconds if item.segment.end_time_offset.seconds != None else 0
+                    end_time_nanos = item.segment.end_time_offset.nanos if item.segment.end_time_offset.nanos != None else 0
+
                     yield {
                         'description': item['entity']['description'],
-                        'time' : 0
+                        'time': (end_time_seconds + end_time_nanos/(1*10**9)) - (start_time_seconds + start_time_nanos/(1*10**9))
                     }
-
-        # logging.info(clear_data)
-
-        # json_string = json.dumps([item for item in clear_data])
-        # logging.info(json_string)
-        # yield json_string
 
 class DataflowOptions(PipelineOptions):
 
