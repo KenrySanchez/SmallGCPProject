@@ -28,16 +28,16 @@ class ReadFile(beam.DoFn):
             for elems in data['annotation_results']:
                 for item in elems['object_annotations']:
 
-                    clear_data.append({
+                    yield {
                         'description': item['entity']['description'],
                         'time' : 0
-                    })
+                    }
 
-        logging.info(clear_data)
+        # logging.info(clear_data)
 
-        json_string = json.dumps([item for item in clear_data])
-        logging.info(json_string)
-        yield json_string
+        # json_string = json.dumps([item for item in clear_data])
+        # logging.info(json_string)
+        # yield json_string
 
 class DataflowOptions(PipelineOptions):
 
