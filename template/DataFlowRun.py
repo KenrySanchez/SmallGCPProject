@@ -21,22 +21,19 @@ class ReadFile(beam.DoFn):
         logging.info(self.input_path.get())
 
         clear_data = []
-        with open(self.input_path.get()) as fin:
+        with open(self.input_path.get()) as line:
 
             logging.info("test")
-            logging.info(fin)
+            logging.info("line " + line)
+            data = json.loads(line)
+            
+            for elems in data['annotation_results']:
+                for item in elems['object_annotations']:
 
-            for line in fin:
-                logging.info("line " + line)
-                data = json.loads(line)
-                
-                for elems in data['annotation_results']:
-                  for item in elems['object_annotations']:
-
-                    clear_data.append({
-                      'description': item['entity']['description'],
-                      'time' : 0
-                    })
+                clear_data.append({
+                    'description': item['entity']['description'],
+                    'time' : 0
+                })
 
         yield clear_data
 
