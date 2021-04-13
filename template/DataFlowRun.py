@@ -33,6 +33,10 @@ class ReadFile(beam.DoFn):
                     start_time_nanos = item['segment']['start_time_offset'][
                         'nanos'] if hasattr(item['segment']['start_time_offset'], "nanos") else 0
 
+                    ## testing time. it seems it's not working!!
+                    logging.info(item['segment']
+                                 ['start_time_offset'].has_key("seconds"))
+
                     end_time_seconds = item['segment']['end_time_offset'][
                         'seconds'] if hasattr(item['segment']['end_time_offset'], "seconds") else 0
                     end_time_nanos = item['segment']['end_time_offset']['nanos'] if hasattr(
