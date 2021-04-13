@@ -18,11 +18,10 @@ class ReadFile(beam.DoFn):
 
     def process(self, something):
         
-        logging.info("kenry")
         logging.info(self.input_path.get())
 
         clear_data = []
-        with open(self.input_path) as fin:
+        with open(self.input_path.get()) as fin:
             for line in fin:
                 data = json.loads(line)
                 
