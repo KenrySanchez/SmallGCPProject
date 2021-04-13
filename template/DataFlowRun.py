@@ -22,6 +22,8 @@ class ReadFile(beam.DoFn):
 
         clear_data = []
         with open(self.input_path.get()) as fin:
+            logging.info("test")
+            logging.info(fin)
             for line in fin:
                 data = json.loads(line)
                 
