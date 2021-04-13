@@ -24,10 +24,11 @@ class ReadFile(beam.DoFn):
         with open(self.input_path.get()) as line:
 
             logging.info("test")
-            logging.info("line " + line)
             data = json.loads(line)
+            logging.info("kenry")
             
             for elems in data['annotation_results']:
+                logging.info(elems)
                 for item in elems['object_annotations']:
 
                     clear_data.append({
