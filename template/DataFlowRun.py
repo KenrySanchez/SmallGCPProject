@@ -34,7 +34,10 @@ class ReadFile(beam.DoFn):
                     })
 
         logging.info(clear_data)
-        yield clear_data
+
+        json_string = json.dumps([item.__dict__ for item in clear_data])
+        logging.info(json_string)
+        yield json_string
 
 class DataflowOptions(PipelineOptions):
 
