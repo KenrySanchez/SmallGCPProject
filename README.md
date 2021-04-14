@@ -31,12 +31,13 @@ __Create your BigQuery Table__
 
 The Output must be like:
 
+```
 +---------+-------+--------+-------------------+
 | tableId | Type  | Labels | Time Partitioning |
 +---------+-------+--------+-------------------+
 | mytable | TABLE |        |                   |
 +---------+-------+--------+-------------------+
-
+```
 #### Deploy GCP function
 
 We need to create another Bucket for storage the function. Then, we can deploy the function to connect the whole pipeline. Run the following on console:
