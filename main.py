@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+# https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,49 +34,51 @@ from google.cloud import storage
 from googleapiclient.discovery import build
 import pytz
 
-PROJECT_ID = os.getenv("apt-subset-310017")
-BQ_DATASET = "bq_object_detection_store"
-BQ_TABLE = "data_store"
+PROJECT_ID = os.getenv("logo-project-306822")
+BQ_DATASET = "logo_dataset"
+BQ_TABLE = "logo_table"
 CS = storage.Client()
 BQ = bigquery.Client()
 
 
 def streaming(data, context):
-    '''This function is executed whenever a file is added to Cloud Storage'''
-    bucket_name = data["bucket"]
-    file_name = data["name"]
-    try:
-        _insert_into_bigquery(bucket_name, file_name, str(data["timeCreated"]))
-    except Exception as e:
-        logging.error(e)
+
+'''This function is executed whenever a file is added to Cloud Storage'''
+bucket_name = data["bucket"]
+file_name = data["name"]
+try:
+_insert_into_bigquery(bucket_name, file_name, str(data["timeCreated"]))
+except Exception as e:
+logging.error(e)
 
 
 def _insert_into_bigquery(bucket_name, file_name, time_exec):
 
-    project = "apt-subset-310017"
-    job = project + " " + time_exec
 
-    #path of the dataflow template on google storage bucket
-    template = "gs://dataflow_assets/templates/myTemplate"
-    inputFile = "gs://" + bucket_name + "/" + file_name
+project = "logo-project-306822"
+job = project + " " + time_exec
 
-    parameters = {
-        "input": inputFile
-    }
+#path of the dataflow template on google storage bucket
+template = "gs://logo_dataflow_assets/templates/myTemplate"
+inputFile = "gs://" + bucket_name + "/" + file_name
 
-    environment = {"tempLocation": "gs://dataflow_assets/temp"}
-    service = build("dataflow", "v1b3", cache_discovery=False)
+parameters = {
+    "input": inputFile
+}
 
-    request = service.projects().locations().templates().launch(
-        projectId=project,
-        gcsPath=template,
-        location="us-central1",
-        body={
-            "jobName": job,
-         			"parameters": parameters,
-         			"environment": environment
-        },
-    )
+environment = {"tempLocation": "gs://logo_dataflow_assets/temp"}
+service = build("dataflow", "v1b3", cache_discovery=False)
 
-    response = request.execute()
-    print(str(response))
+request = service.projects().locations().templates().launch(
+    projectId=project,
+    gcsPath=template,
+    location="us-central1",
+    body={
+        "jobName": job,
+        "parameters": parameters,
+        "environment": environment
+    },
+)
+
+response = request.execute()
+print(str(response))
