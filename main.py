@@ -43,42 +43,40 @@ BQ = bigquery.Client()
 
 def streaming(data, context):
 
-'''This function is executed whenever a file is added to Cloud Storage'''
-bucket_name = data["bucket"]
-file_name = data["name"]
-try:
-_insert_into_bigquery(bucket_name, file_name, str(data["timeCreated"]))
-except Exception as e:
-logging.error(e)
+    bucket_name = data["bucket"]
+    file_name = data["name"]
+    try:
+        _insert_into_bigquery(bucket_name, file_name, str(data["timeCreated"]))
+    except Exception as e:
+        logging.error(e)
 
 
 def _insert_into_bigquery(bucket_name, file_name, time_exec):
 
+    project = "logo-project-306822"
+    job = project + " " + time_exec
 
-project = "logo-project-306822"
-job = project + " " + time_exec
+    #path of the dataflow template on google storage bucket
+    template = "gs://logo_dataflow_assets/templates/myTemplate"
+    inputFile = "gs://" + bucket_name + "/" + file_name
 
-#path of the dataflow template on google storage bucket
-template = "gs://logo_dataflow_assets/templates/myTemplate"
-inputFile = "gs://" + bucket_name + "/" + file_name
+    parameters = {
+        "input": inputFile
+    }
 
-parameters = {
-    "input": inputFile
-}
+    environment = {"tempLocation": "gs://logo_dataflow_assets/temp"}
+    service = build("dataflow", "v1b3", cache_discovery=False)
 
-environment = {"tempLocation": "gs://logo_dataflow_assets/temp"}
-service = build("dataflow", "v1b3", cache_discovery=False)
+    request = service.projects().locations().templates().launch(
+        projectId=project,
+        gcsPath=template,
+        location="us-central1",
+        body={
+            "jobName": job,
+            "parameters": parameters,
+            "environment": environment
+        },
+    )
 
-request = service.projects().locations().templates().launch(
-    projectId=project,
-    gcsPath=template,
-    location="us-central1",
-    body={
-        "jobName": job,
-        "parameters": parameters,
-        "environment": environment
-    },
-)
-
-response = request.execute()
-print(str(response))
+    response = request.execute()
+    print(str(response))
