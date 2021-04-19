@@ -61,7 +61,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | "Start" >> beam.Create([None])
                 | "Read JSON" >> beam.ParDo(ReadFile(user_options.input))
-                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description: STRING, time: FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
+                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,time:FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
              )
 
 
