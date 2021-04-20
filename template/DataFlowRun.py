@@ -17,6 +17,36 @@ class ReadFile(beam.DoFn):
     def start_bundle(self):
         self.client = storage.Client()
 
+    def calculate_time_values(self, item):
+
+        time = 0
+        start_time = 0
+        end_time = 0
+
+        for segment in item["segments"]:
+  
+            start_time_seconds = segment["start_time_offset"][
+                "seconds"] if "seconds" in segment["start_time_offset"] else 0
+                
+            start_time_nanos = segment["start_time_offset"][
+                "nanos"] if "nanos" in segment["start_time_offset"] else 0
+
+            end_time_seconds = segment["end_time_offset"][
+                "seconds"] if "seconds" in segment["end_time_offset"] else 0
+
+            end_time_nanos = segment["end_time_offset"][
+                "nanos"] if "nanos" in segment["end_time_offset"] else 0
+
+            start_time += (start_time_seconds +
+                            start_time_nanos/(1*10**9))
+            end_time += (end_time_seconds +
+                            end_time_nanos/(1*10**9))
+
+            time +=  end_time - start_time
+        
+        return time, start_time, end_time
+        
+
     def process(self, something):
 
         clear_data = []
@@ -39,27 +69,7 @@ class ReadFile(beam.DoFn):
                         confidence += track["confidence"]
 
                     ## this is the block using logo_recognition_annotations.segments
-                    for segment in item["segments"]:
-
-                        start_time_seconds = segment["start_time_offset"][
-                            "seconds"] if "seconds" in segment["start_time_offset"] else 0
-                            
-                        start_time_nanos = segment["start_time_offset"][
-                            "nanos"] if "nanos" in segment["start_time_offset"] else 0
-
-                        end_time_seconds = segment["end_time_offset"][
-                            "seconds"] if "seconds" in segment["end_time_offset"] else 0
-
-                        end_time_nanos = segment["end_time_offset"][
-                            "nanos"] if "nanos" in segment["end_time_offset"] else 0
-
-                        start_time += (start_time_seconds +
-                                      start_time_nanos/(1*10**9))
-                        end_time += (end_time_seconds +
-                                     end_time_nanos/(1*10**9))
-
-                        time +=  end_time - start_time
-
+                    time, start_time, end_time = self.calculate_time_values(item)
                     
                     yield {
                         "time": time,
