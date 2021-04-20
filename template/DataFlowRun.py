@@ -27,23 +27,46 @@ class ReadFile(beam.DoFn):
             data = json.loads(jsonAsString)
 
             for elems in data["annotation_results"]:
-                for item in elems["object_annotations"]:
 
-                    start_time_seconds = item["segment"]["start_time_offset"][
-                        "seconds"] if "seconds" in item["segment"]["start_time_offset"] else 0
-                        
-                    start_time_nanos = item["segment"]["start_time_offset"][
-                        "nanos"] if "nanos" in item["segment"]["start_time_offset"] else 0
+                for item in elems["logo_recognition_annotations"]:
 
-                    end_time_seconds = item["segment"]["end_time_offset"][
-                        "seconds"] if "seconds" in item["segment"]["end_time_offset"] else 0
+                    time = 0
+                    confidence = 0
+                    start_time = 0
+                    end_time = 0
 
-                    end_time_nanos = item["segment"]["end_time_offset"][
-                        "nanos"] if "nanos" in item["segment"]["end_time_offset"] else 0
+                    for track in item["tracks"]:
+                        confidence += track["confidence"]
 
+                    ## this is the block using logo_recognition_annotations.segments
+                    for segment in item["segments"]:
+
+                        start_time_seconds = segment["start_time_offset"][
+                            "seconds"] if "seconds" in segment["start_time_offset"] else 0
+                            
+                        start_time_nanos = segment["start_time_offset"][
+                            "nanos"] if "nanos" in segment["start_time_offset"] else 0
+
+                        end_time_seconds = segment["end_time_offset"][
+                            "seconds"] if "seconds" in segment["end_time_offset"] else 0
+
+                        end_time_nanos = segment["end_time_offset"][
+                            "nanos"] if "nanos" in segment["end_time_offset"] else 0
+
+                        start_time += (start_time_seconds +
+                                      start_time_nanos/(1*10**9))
+                        end_time += (end_time_seconds +
+                                     end_time_nanos/(1*10**9))
+
+                        time +=  end_time - start_time
+
+                    
                     yield {
+                        "time": time,
+                        "confidence": confidence,
+                        "start_time": start_time,
+                        "end_time": end_time,
                         "description": item["entity"]["description"],
-                        "time": (end_time_seconds + end_time_nanos/(1*10**9)) - (start_time_seconds + start_time_nanos/(1*10**9))
                     }
 
 
@@ -61,7 +84,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | "Start" >> beam.Create([None])
                 | "Read JSON" >> beam.ParDo(ReadFile(user_options.input))
-                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,time:FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
+                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,time:FLOAT,start_time:FLOAT,end_time:FLOAT,confidence:FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
              )
 
 
