@@ -17,32 +17,30 @@ class ReadFile(beam.DoFn):
     def start_bundle(self):
         self.client = storage.Client()
 
-    def calculate_time_values(self, item):
+    def calculate_time_values(self, segment):
 
         time = 0
         start_time = 0
         end_time = 0
-
-        for segment in item["segments"]:
   
-            start_time_seconds = segment["start_time_offset"][
-                "seconds"] if "seconds" in segment["start_time_offset"] else 0
-                
-            start_time_nanos = segment["start_time_offset"][
-                "nanos"] if "nanos" in segment["start_time_offset"] else 0
+        start_time_seconds = segment["start_time_offset"][
+            "seconds"] if "seconds" in segment["start_time_offset"] else 0
+            
+        start_time_nanos = segment["start_time_offset"][
+            "nanos"] if "nanos" in segment["start_time_offset"] else 0
 
-            end_time_seconds = segment["end_time_offset"][
-                "seconds"] if "seconds" in segment["end_time_offset"] else 0
+        end_time_seconds = segment["end_time_offset"][
+            "seconds"] if "seconds" in segment["end_time_offset"] else 0
 
-            end_time_nanos = segment["end_time_offset"][
-                "nanos"] if "nanos" in segment["end_time_offset"] else 0
+        end_time_nanos = segment["end_time_offset"][
+            "nanos"] if "nanos" in segment["end_time_offset"] else 0
 
-            start_time += (start_time_seconds +
-                            start_time_nanos/(1*10**9))
-            end_time += (end_time_seconds +
-                            end_time_nanos/(1*10**9))
+        start_time += (start_time_seconds +
+                        start_time_nanos/(1*10**9))
+        end_time += (end_time_seconds +
+                        end_time_nanos/(1*10**9))
 
-            time +=  end_time - start_time
+        time +=  end_time - start_time
         
         return time, start_time, end_time
         
@@ -65,11 +63,28 @@ class ReadFile(beam.DoFn):
                     start_time = 0
                     end_time = 0
 
+                    getter_time = 0
+                    getter_start = 0
+                    getter_end = 0
+
                     for track in item["tracks"]:
                         confidence += track["confidence"]
 
+                        ## this is the block using logo_recognition_annotations.tracks
+                        getter_time, getter_start, getter_end = self.calculate_time_values(track["segment"])
+
+                        time += getter_time
+                        start_time += getter_start
+                        end_time = getter_end
+
                     ## this is the block using logo_recognition_annotations.segments
-                    time, start_time, end_time = self.calculate_time_values(item)
+                    ##for segment in item["segments"]:
+
+                        ##getter_time, getter_start, getter_end = self.calculate_time_values(segment)
+
+                        ##time += getter_time
+                        ##start_time += getter_start
+                        ##end_time = getter_end
                     
                     yield {
                         "time": time,
