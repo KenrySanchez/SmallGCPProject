@@ -26,13 +26,13 @@ class ReadFile(beam.DoFn):
             "seconds"] if "seconds" in segment["start_time_offset"] else 0
             
         start_time_nanos = round(segment["start_time_offset"][
-            "nanos"] if "nanos" in segment["start_time_offset"] else 0, 2)
+            "nanos"], 2) if "nanos" in segment["start_time_offset"] else 0
 
         end_time_seconds = segment["end_time_offset"][
             "seconds"] if "seconds" in segment["end_time_offset"] else 0
 
         end_time_nanos = round(segment["end_time_offset"][
-            "nanos"] if "nanos" in segment["end_time_offset"] else 0,  2)
+            "nanos"], 2) if "nanos" in segment["end_time_offset"] else 0
 
         start_time += (start_time_seconds +
                         start_time_nanos/(1*10**9))
