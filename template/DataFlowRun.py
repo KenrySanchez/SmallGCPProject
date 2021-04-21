@@ -8,7 +8,6 @@ from apache_beam.options.value_provider import StaticValueProvider
 from google.cloud import storage
 from smart_open import open
 
-
 class ReadFile(beam.DoFn):
 
     def __init__(self, input_path):
@@ -26,14 +25,14 @@ class ReadFile(beam.DoFn):
         start_time_seconds = segment["start_time_offset"][
             "seconds"] if "seconds" in segment["start_time_offset"] else 0
             
-        start_time_nanos = segment["start_time_offset"][
-            "nanos"] if "nanos" in segment["start_time_offset"] else 0
+        start_time_nanos = round(segment["start_time_offset"][
+            "nanos"] if "nanos" in segment["start_time_offset"] else 0, 2)
 
         end_time_seconds = segment["end_time_offset"][
             "seconds"] if "seconds" in segment["end_time_offset"] else 0
 
-        end_time_nanos = segment["end_time_offset"][
-            "nanos"] if "nanos" in segment["end_time_offset"] else 0
+        end_time_nanos = round(segment["end_time_offset"][
+            "nanos"] if "nanos" in segment["end_time_offset"] else 0,  2)
 
         start_time += (start_time_seconds +
                         start_time_nanos/(1*10**9))
@@ -67,32 +66,39 @@ class ReadFile(beam.DoFn):
                     getter_start = 0
                     getter_end = 0
 
-                    for track in item["tracks"]:
-                        confidence += track["confidence"]
+                    ## this is the block using logo_recognition_annotations.tracks.
+                    ## Calculus by each logo_recognition_annotations [lines 70-86]
+                    # for track in item["tracks"]:
+                    #     confidence += track["confidence"]
 
-                        ## this is the block using logo_recognition_annotations.tracks
+                    #     getter_time, getter_start, getter_end = self.calculate_time_values(track["segment"])
+
+                    #     time += getter_time
+                    #     start_time += getter_start
+                    #     end_time = getter_end
+                    
+                    # yield {
+                    #     "time": time,
+                    #     "confidence": confidence,
+                    #     "start_time": start_time,
+                    #     "end_time": end_time,
+                    #     "description": item["entity"]["description"],
+                    # }
+
+                    ## this is the block using logo_recognition_annotations.tracks.
+                    ## Calculus by each logo_recognition_annotations [lines 90-107]
+                    for track in item["tracks"]:
+                        confidence = track["confidence"]
+
                         getter_time, getter_start, getter_end = self.calculate_time_values(track["segment"])
 
-                        time += getter_time
-                        start_time += getter_start
-                        end_time = getter_end
-
-                    ## this is the block using logo_recognition_annotations.segments
-                    ##for segment in item["segments"]:
-
-                        ##getter_time, getter_start, getter_end = self.calculate_time_values(segment)
-
-                        ##time += getter_time
-                        ##start_time += getter_start
-                        ##end_time = getter_end
-                    
-                    yield {
-                        "time": time,
-                        "confidence": confidence,
-                        "start_time": start_time,
-                        "end_time": end_time,
-                        "description": item["entity"]["description"],
-                    }
+                        yield {
+                            "time": getter_time,
+                            "confidence": confidence,
+                            "start_time": getter_start,
+                            "end_time": getter_end,
+                            "description": item["entity"]["description"],
+                        }
 
 
 class DataflowOptions(PipelineOptions):
