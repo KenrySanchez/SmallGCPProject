@@ -34,12 +34,10 @@ class ReadFile(beam.DoFn):
         end_time_nanos = round(segment["end_time_offset"][
             "nanos"], 2) if "nanos" in segment["end_time_offset"] else 0
 
-        start_time += (start_time_seconds +
-                        start_time_nanos/(1*10**9))
-        end_time += (end_time_seconds +
-                        end_time_nanos/(1*10**9))
+        start_time += round((start_time_seconds + start_time_nanos/(1*10**9)), 2)
+        end_time += round((end_time_seconds + end_time_nanos/(1*10**9)), 2)
 
-        time +=  end_time - start_time
+        time += end_time - start_time
         
         return time, start_time, end_time
         
@@ -78,7 +76,7 @@ class ReadFile(beam.DoFn):
                     #     end_time = getter_end
                     
                     # yield {
-                    #     "time": time,
+                    #     "duration": time,
                     #     "confidence": confidence,
                     #     "start_time": start_time,
                     #     "end_time": end_time,
@@ -93,7 +91,7 @@ class ReadFile(beam.DoFn):
                         getter_time, getter_start, getter_end = self.calculate_time_values(track["segment"])
 
                         yield {
-                            "time": getter_time,
+                            "duration": getter_time,
                             "confidence": confidence,
                             "start_time": getter_start,
                             "end_time": getter_end,
@@ -115,7 +113,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | "Start" >> beam.Create([None])
                 | "Read JSON" >> beam.ParDo(ReadFile(user_options.input))
-                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,time:FLOAT,start_time:FLOAT,end_time:FLOAT,confidence:FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
+                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,duration:FLOAT,start_time:FLOAT,end_time:FLOAT,confidence:FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
              )
 
 
