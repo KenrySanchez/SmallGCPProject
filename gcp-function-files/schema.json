@@ -1,4 +1,8 @@
 {
   "description": "STRING",
-  "time" : "FLOAT"
+  "duration" : "FLOAT",
+  "start_time": "FLOAT",
+  "end_time": "FLOAT",
+  "confidence": "FLOAT",
+  "filename": "STRING"
 }

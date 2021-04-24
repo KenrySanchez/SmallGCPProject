@@ -45,6 +45,10 @@ class ReadFile(beam.DoFn):
     def process(self, something):
 
         clear_data = []
+        
+        print(self.input_path)
+        file_name = str(self.input_path.get()).split("/")[-1]
+        
         with open(self.input_path.get()) as line:
 
             jsonAsString = line.read()
@@ -96,6 +100,7 @@ class ReadFile(beam.DoFn):
                             "start_time": getter_start,
                             "end_time": getter_end,
                             "description": item["entity"]["description"],
+                            "filename": file_name
                         }
 
 
@@ -113,7 +118,7 @@ class DataflowOptions(PipelineOptions):
             (pipeline
                 | "Start" >> beam.Create([None])
                 | "Read JSON" >> beam.ParDo(ReadFile(user_options.input))
-                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,duration:FLOAT,start_time:FLOAT,end_time:FLOAT,confidence:FLOAT", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
+                | "Write to BigQuery" >> beam.io.Write(beam.io.WriteToBigQuery("logo-project-306822:logo_dataset.logo_table", schema="description:STRING,duration:FLOAT,start_time:FLOAT,end_time:FLOAT,confidence:FLOAT,filename:STRING", write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
              )
 
 
