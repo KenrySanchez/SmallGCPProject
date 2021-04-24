@@ -45,8 +45,6 @@ class ReadFile(beam.DoFn):
     def process(self, something):
 
         clear_data = []
-        
-        print(self.input_path)
         file_name = str(self.input_path.get()).split("/")[-1]
         
         with open(self.input_path.get()) as line:
