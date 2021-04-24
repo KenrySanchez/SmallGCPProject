@@ -37,7 +37,7 @@ class ReadFile(beam.DoFn):
         start_time += round((start_time_seconds + start_time_nanos/(1*10**9)), 2)
         end_time += round((end_time_seconds + end_time_nanos/(1*10**9)), 2)
 
-        time += end_time - start_time
+        time += round(end_time - start_time, 2)
         
         return time, start_time, end_time
         
